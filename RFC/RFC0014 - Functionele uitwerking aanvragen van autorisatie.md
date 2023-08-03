@@ -337,9 +337,10 @@ Een resource-server beschermd achterliggende resources tegen ongeautoriseerder t
 - De registratie van autorisatieservers vindt plaats in de organisatieprofielen binnen de servicesdirectory.  
 - De registratie van de resource maakt ook onderdeel uit van organisatieprofielen binnen de servicesdirectory. De access-policy past deze toe tijdens de autorisatie door de autorisatieserver.
 
-<span style="color:blue">
-NW: Hieronder 'oauth2' vergeten in de TST url?
-</span>
+$${\color{blue}NW: Hieronder 'oauth2' vergeten in de TST url?}$$
+$${\color{blue}
+    NW: Hieronder 'oauth2' vergeten in de TST url?
+}$$
 
 |Omgeving|URL|
 |:--- |:--- 
