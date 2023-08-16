@@ -69,14 +69,19 @@ Opsomming van de in dit document gebruikte termen.
 |:--- |:--- 
 |Claims|Een claim is een kwalificatie, een behaalde prestatie of een stukje informatie over de achtergrond van een entiteit, zoals een naam, id, huisadres of afgeronde opleiding. Een claim zegt iets over de entiteit (deelnemer)  |
 |Scopes|Een scope geeft de limieten van autorisatie tot een resource aan. Een scope kan een deelnemer bij de autorisatieserver aanvragen. 
-|autorisatieserver|Een autorisatieserver deelt Access-Tokens uit om te kunnen communiceren met een Resouce Server.
+|autorisatieserver|Een autorisatieserver deelt Access-Tokens uit om te kunnen communiceren met een Resource Server.
 |Access-Token|Een access-token wordt uitgegeven aan een deelnemer door de autorisatieserver. Een Access-Token heeft een korte levensduur en bevat informatie over de deelnemer, de scopes(permissies) en diverse tijdsaspecten.|
 |Resource Server|Een resource server beschermd de resource, valideerd het Access-Token en geeft op basis van de beschreven scopes toegang tot de resource.| 
 |nID-Filter|Het nID-Filter is onderdeel van de Resource Server en heeft als taak het verzoek tot de resource te valideren tegen de uitgedeelde scope(s).
 
 # 3. Schematische weergave 
  
- Voor alle activiteiten in het Netwerkstelstel is autorisatie noodzakelijk, deze autorasaties kunnen worden aangevraagd bij de autorisatieserver. Voorbeelden van activiteiten zijn: lezen, schrijven, aanpassen en verwijderen van data uit registers, maar ook het versturen van notificaties en meldingen. 
+ Voor alle activiteiten in het Netwerkstelstel is autorisatie noodzakelijk, deze autorisaties kunnen worden aangevraagd bij de autorisatieserver. Voorbeelden van activiteiten zijn: lezen, schrijven, aanpassen en verwijderen van data uit registers, maar ook het versturen van notificaties en meldingen. 
+
+<span style="color:blue">
+NW: Vanuit het voorbeeld is de scope voortaan op het niveau van een bronregister? (/register/resource:read) Nu heb je een token per notificatie en dus per indicatie.
+I.c.m. het refreshtoken. Heb je maar één access-token per bronregister nodig die je oneindig kan verversen?
+</span>
 
  In het onderstaande schema wordt de basis uitgelegd voor het aanvragen van autorisatie.
 
@@ -172,7 +177,7 @@ In de kern is de autorisatieserver een engine om OAuth2 tokens uit te geven, een
 
 Op dit moment kan de autorisatieserver alleen autorisaties voor GraphQL API's uitdelen, de standaard in het iWlz Netwerkmodel.
 
-De autorisatieserver is voor netwerkdeelnemers alleen toegangkelijk op het token-endpoint. Op dit endpoint is een vertrouwd authenticatiemiddel vereist.  
+De autorisatieserver is voor netwerkdeelnemers alleen toegankelijk op het token-endpoint. Op dit endpoint is een vertrouwd authenticatiemiddel vereist.  
 |Omgeving|URL|
 |:--- |:--- 
 |TST|https://tst-api.vecozo.nl/tst/netwerkmodel/v2/oauth2/token|
@@ -182,11 +187,20 @@ De autorisatieserver is voor netwerkdeelnemers alleen toegangkelijk op het token
 
 Het token-endpoint van de autorisatieserver staat toe dat een client in het autorisatieverzoek een "scope" request parameter specificeerd. De autorisatieserver zal deze parameter gebruiken om het access-token als antwoord op het verzoek te voorzien van de scopes. De waarde van de scope parameter in het verzoek is uitgedrukt als een spatie-gescheiden lijst van case-sensitive strings. De mogelijke strings zijn gespecificeerd in de autorisatieserver en zijn gedocumenteerd. Als de lijst meerdere spatie-gescheiden strings bevatten, dan is de volgorde hiervan onbelangrijk. De autorisatieserver zal elke string verwerken als extra scope in het access-token.
 
+<span style="color:blue">
+NW: Bewust gekozen voor backslashes in de scope request parameter? De dubbelepunt kan ook verwarrend zijn bij het parsen van de request parameter?
+Het is uiteindelijk aan de authorisatie server natuurlijk om daar goed mee te kunnen gaan.
+</span>
+
 **Voorbeeld:** van een scope request parameter waar meerdere scopes worden aangevraagd:  
 *"scope":"organisaties\zorgkantoren\[UZOVICode]\notificaties\notificatie:indicatie.create organisaties\zorgaanbieders\[AGBCode]\notificaties\notificatie:indicatie.create"*
 
 
 Als de client een scope aanvraagt waarvoor hij geen autorisatie heeft, dan zal de autorisatieserver een foutmelding retourneren "Access denied, invalid scope", ongeacht of er in dezelfde aanvraag scopes zitten waarvoor wel is geautoriseerd. Als de client geen scope parameter meegeeft in zijn request aan de autorisatieserver, dan MOET de autorisatieserver het verzoek verwerken door een voorgedefinieerde standaard scope toe te passen of een "Invalid scope" foutmelding retourneren. Als de autorisatieserver een verzoek ontvangt waar 1 of meerdere scopes incorrect zijn MOET de autorisatieserver een "Access denied, invalid scope" retourneren.
+
+<span style="color:blue">
+NW: Ik heb zelf de voorkeur om altijd een scope meet te moeten geven. Hoe weten we trouwens welke scope aanvragingen een mogelijk zijn? Puur vanuit documentatie?
+</span>
 
 Een standaard scope zou kunnen zijn:  
 *organisaties\zorgkantoren\[UZOVICode]:profiel.read*
@@ -203,6 +217,10 @@ Header: Authorization Basic <Client ID:Client Secret (Base64 encoded)>
 }
 ```
 Response is een JWT 
+
+<span style="color:blue">
+NW: Alleen Access JWT? Geen Refresh JWT (meer)?
+</span>
 
 ```
 {
@@ -319,6 +337,10 @@ Een resource-server beschermd achterliggende resources tegen ongeautoriseerder t
 - De registratie van autorisatieservers vindt plaats in de organisatieprofielen binnen de servicesdirectory.  
 - De registratie van de resource maakt ook onderdeel uit van organisatieprofielen binnen de servicesdirectory. De access-policy past deze toe tijdens de autorisatie door de autorisatieserver.
 
+$${\color{blue}NW: Hieronder 'oauth2' vergeten in de TST url?}$$
+$${\color{blue}
+    NW: Hieronder 'oauth2' vergeten in de TST url?
+}$$
 
 |Omgeving|URL|
 |:--- |:--- 
@@ -341,7 +363,7 @@ OAuth HTTP error responses
 
 In onderstaande schema worden de mogelijke fouten weergegeven die kunnen optreden bij het ophalen van autorisaties of het uitvoeren van een graphQL verzoek.
 
-<font color=red>LET OP: Onderstaande schema moet nog worden gevalideerd/aangepast en aangevult.</font>
+<span style="color:red">LET OP: Onderstaande schema moet nog worden gevalideerd/aangepast en aangevult.</span>
 
 ![foutmeldingen_overzicht](../plantUMLsrc/rfc0014-02-foutmeldingen_overzicht.svg "foutmeldingen_overzicht")
 
